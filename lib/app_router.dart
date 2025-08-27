@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'presentation/screens/login_screen.dart';
-import 'presentation/screens/dashboard_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'presentation/blocs/auth/auth_bloc.dart';
-import 'presentation/blocs/auth/auth_state.dart'; 
+import 'package:go_router/go_router.dart';
+
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/bloc/auth_state.dart';
+import 'features/auth/presentation/pages/login_page.dart';
+
+import 'features/part-report/presentation/pages/part_report_page.dart';
+import 'features/projects/presentation/pages/projects_page.dart';
 
 class AppRouter {
   late final GoRouter router;
@@ -15,20 +18,29 @@ class AppRouter {
       redirect: (context, state) {
         final authState = context.read<AuthBloc>().state;
         final loggedIn = authState is AuthAuthenticated;
-        final loggingIn = state.uri.toString() == '/login'; 
+        final loggingIn = state.uri.toString() == '/login';
 
         if (!loggedIn && !loggingIn) return '/login';
-        if (loggedIn && loggingIn) return '/dashboard';
+        if (loggedIn && loggingIn) return '/projects';
         return null;
       },
       routes: [
         GoRoute(
           path: '/login',
-          builder: (context, state) => LoginScreen(),
+          builder: (context, state) => const LoginPage(),
         ),
         GoRoute(
-          path: '/dashboard',
-          builder: (context, state) => DashboardScreen(),
+          path: '/projects',
+          builder: (context, state) => const ProjectsPage(),
+          routes: [
+            GoRoute(
+              path: ':id/part-report',
+              builder: (context, state) {
+                final id = int.parse(state.pathParameters['id']!);
+                return PartReportPage(projectId: id);
+              },
+            ),
+          ],
         ),
       ],
     );
