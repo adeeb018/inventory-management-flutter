@@ -1,6 +1,11 @@
+import '../repositories/auth_repository.dart';
+
 class LogoutUser {
-  Future<void> call() async {
-    // For now, logout is just clearing token in bloc.
-    return;
+  final AuthRepository repository;
+
+  LogoutUser(this.repository);
+
+  Future<void> call() {
+    return repository.logout();
   }
 }

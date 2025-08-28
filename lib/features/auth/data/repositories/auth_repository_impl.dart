@@ -1,23 +1,48 @@
-import 'package:dio/dio.dart';
-import 'package:inventory_management/core/constants.dart';
-
-abstract class AuthRepository {
-  Future<String?> login(String username, String password);
-}
+import 'package:inventory_management/core/network/api_client.dart';
+import 'package:inventory_management/features/auth/domain/entities/user_token.dart';
+import '../../domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final Dio _dio = Dio(BaseOptions(baseUrl: AppConstants.baseUrl));
+  final ApiClient apiClient;
+
+  AuthRepositoryImpl({required this.apiClient});
 
   @override
-  Future<String?> login(String username, String password) async {
+  Future<UserToken> login(String username, String password) async {
     try {
-      final res = await _dio.post('/auth/login', data: {
+      final res = await apiClient.dio.post('/auth/login', data: {
         'username': username,
         'password': password,
       });
-      return res.data['token'];
+      return UserToken(
+        accessToken: res.data['accessToken'],
+        refreshToken: res.data['refreshToken'],
+      );
     } catch (e) {
       throw Exception('Login failed: $e');
+    }
+  }
+
+  @override
+  Future<void> logout() async {
+    // If backend has logout API, call it here
+    // await apiClient.dio.post('/auth/logout');
+    return;
+  }
+
+  @override
+  Future<UserToken> refreshToken(String refreshToken) async {
+    try {
+      final response = await apiClient.dio.post('/auth/refresh', data: {
+        'refreshToken': refreshToken,
+      });
+
+      return UserToken(
+        accessToken: response.data['access_token'],
+        refreshToken: refreshToken, // keep the same refresh token
+      );
+    } catch (e) {
+      throw Exception('Refresh token failed: $e');
     }
   }
 }

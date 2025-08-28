@@ -1,10 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:inventory_management/core/constants.dart';
+import 'package:inventory_management/core/network/api_client.dart';
+import 'package:inventory_management/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:inventory_management/features/auth/domain/usecases/login_user.dart';
+import 'package:inventory_management/features/auth/domain/usecases/logout_user.dart';
+import 'package:inventory_management/features/auth/domain/usecases/refresh_token.dart';
+import 'package:inventory_management/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:inventory_management/features/auth/presentation/bloc/auth_event.dart';
 import 'app_router.dart';
-import 'features/auth/domain/usecases/login_user.dart';
-import 'features/auth/domain/usecases/logout_user.dart';
-import 'features/auth/presentation/bloc/auth_bloc.dart';
-import 'features/auth/data/repositories/auth_repository_impl.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,16 +22,24 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appRouter = AppRouter();
-    return RepositoryProvider(
-      create: (_) => AuthRepositoryImpl(),
+
+    // Single Dio + ApiClient instance
+    final dio = Dio(BaseOptions(baseUrl: AppConstants.baseUrl));
+    const secureStorage = FlutterSecureStorage();
+    final apiClient = ApiClient(dio, secureStorage);
+
+    // Auth Repository uses apiClient
+    final authRepository = AuthRepositoryImpl(apiClient: apiClient);
+
+    return RepositoryProvider.value(
+      value: apiClient,
       child: BlocProvider(
-        create: (ctx) {
-          final authRepository = ctx.read<AuthRepositoryImpl>();
-          return AuthBloc(
-            loginUser: LoginUser(authRepository),
-            logoutUser: LogoutUser(),
-          );
-        },
+        create: (ctx) => AuthBloc(
+          loginUser: LoginUser(authRepository),
+          logoutUser: LogoutUser(authRepository),
+          refreshTokenUseCase: RefreshToken(authRepository),
+          secureStorage: secureStorage,
+        )..add(AppStarted()),
         child: MaterialApp.router(
           title: 'Projects',
           routerConfig: appRouter.router,

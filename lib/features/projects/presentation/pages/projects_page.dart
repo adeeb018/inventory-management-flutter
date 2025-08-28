@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/network/api_client.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -17,12 +18,10 @@ class ProjectsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authBloc = context.read<AuthBloc>();
-    final token = (authBloc.state is AuthAuthenticated)
-        ? (authBloc.state as AuthAuthenticated).token
-        : authBloc.token; // fallback if you store it on bloc
 
-    final repository = ProjectsRepositoryImpl(token: token!);
+    // Initialize repository and use-case
+    final apiClient = context.read<ApiClient>();
+    final repository = ProjectsRepositoryImpl(apiClient: apiClient);
     final getProjects = GetProjects(repository);
 
     return MultiBlocListener(

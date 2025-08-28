@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/network/api_client.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../data/repositories/part_report_repository_impl.dart';
@@ -15,14 +16,10 @@ class PartReportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get token from AuthBloc
-    final authBloc = context.read<AuthBloc>();
-    final token = (authBloc.state is AuthAuthenticated)
-        ? (authBloc.state as AuthAuthenticated).token
-        : authBloc.token;
 
     // Initialize repository and use-case
-    final repository = PartReportRepositoryImpl(token: token!);
+    final apiClient = context.read<ApiClient>();
+    final repository = PartReportRepositoryImpl(apiClient: apiClient);
     final getPartReport = GetPartReport(repository);
 
     return BlocProvider(

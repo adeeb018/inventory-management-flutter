@@ -33,6 +33,10 @@ dependencies:
   flutter_bloc: 
   go_router:
   dio: ^5.3.2
+  flutter_secure_storage:
+  jwt_decoder:
+  get_it:
+  logger:
 
 
   # The following adds the Cupertino Icons font to your application.

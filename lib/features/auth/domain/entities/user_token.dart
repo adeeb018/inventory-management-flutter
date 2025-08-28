@@ -1,5 +1,6 @@
 class UserToken {
-  final String token;
+  final String accessToken;
+  final String refreshToken;
 
-  UserToken(this.token);
+  UserToken({required this.accessToken, required this.refreshToken});
 }
