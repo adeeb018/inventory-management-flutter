@@ -6,10 +6,13 @@ import 'package:inventory_management/features/auth/presentation/bloc/auth_event.
 import 'package:inventory_management/features/auth/presentation/bloc/auth_state.dart';
 import 'package:logger/logger.dart';
 
+import '../auth/auth_service.dart';
+
 class ApiClient {
   final logger = Logger();
   final Dio dio;
   final FlutterSecureStorage secureStorage;
+  final AuthService authService = GetIt.I<AuthService>();
 
   ApiClient(this.dio, this.secureStorage) {
     dio.interceptors.add(InterceptorsWrapper(
@@ -41,45 +44,34 @@ class ApiClient {
           logger.d(errorBody);
           if (errorBody == 'Invalid or expired token') {
             logger.d('[ApiClient] 401 detected. Attempting to refresh token...');
-            final refreshToken = await secureStorage.read(key: 'refreshToken');
-            logger.d('[ApiClient] Refresh token: $refreshToken');
+            authService.notify(AuthEventType.tokenExpired);
+            try {
+              await authService.waitForRefresh(); // 👈 wait for Bloc refresh
+              final newToken = await secureStorage.read(key: 'accessToken');
 
-            if (refreshToken != null) {
-              try {
-                logger.d('[ApiClient] Calling /auth/refresh API...');
-                final response = await dio.post(
-                  '/auth/refresh',
-                  data: {'refreshToken': refreshToken},
-                  options: Options(
-                    extra: {'skipAuth': true}, // custom flag
-                  ),
-                );
-
-                final newAccessToken = response.data['accessToken'];
-                logger.d('[ApiClient] New access token received: $newAccessToken');
-                await secureStorage.write(key: 'accessToken', value: newAccessToken);
-
-                // Retry the failed request with new token
-                error.requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
-                logger.d('[ApiClient] Retrying original request: ${error.requestOptions.path}');
+              // Retry with new token
+              if (newToken != null) {
+                error.requestOptions.headers['Authorization'] = 'Bearer $newToken';
                 final retryResponse = await dio.fetch(error.requestOptions);
-                logger.d('[ApiClient] Retry successful for: ${error.requestOptions.path}');
                 return handler.resolve(retryResponse);
-              } catch (e) {
-                logger.d('[ApiClient] Refresh token failed: $e');
-                await secureStorage.deleteAll();
-                final authBloc = GetIt.I<AuthBloc>();
-                authBloc.add(LogoutRequested());
+              } else {
+                logger.d('[ApiClient] Invalid refresh token...');
+                authService.notify(AuthEventType.logout);
+                return;
               }
-            } else {
-              logger.d('[ApiClient] No refresh token found, logging out...');
-              await secureStorage.deleteAll();
-              final authBloc = GetIt.I<AuthBloc>();
-              authBloc.add(LogoutRequested());
+
+            } catch (_) {
+              // Refresh failed
+              return handler.next(error);
             }
           } else if (errorBody == 'Invalid credentials') {
-            final authBloc = GetIt.I<AuthBloc>();
-            authBloc.add(InvalidCredentials(errorBody));
+            logger.d('[ApiClient] Invalid credentials...');
+            authService.notify(AuthEventType.invalidCredentials);
+            return;
+          } else if (errorBody == 'Invalid refresh token') {
+            logger.d('[ApiClient] Invalid refresh token...');
+            authService.notify(AuthEventType.logout);
+            return;
           }
 
         }

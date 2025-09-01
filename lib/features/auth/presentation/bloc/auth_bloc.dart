@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:inventory_management/features/auth/domain/entities/user_token.dart';
 import 'package:inventory_management/features/auth/domain/usecases/refresh_token.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import '../../../../core/auth/auth_service.dart';
 import '../../domain/usecases/login_user.dart';
 import '../../domain/usecases/logout_user.dart';
 import 'auth_event.dart';
@@ -15,8 +19,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   String? accessToken;
   String? refreshToken;
   final FlutterSecureStorage secureStorage;
+  final AuthService authService = GetIt.I<AuthService>();
+  late final StreamSubscription _authSub;
 
   AuthBloc({required this.loginUser, required this.logoutUser, required this.secureStorage, required this.refreshTokenUseCase}) : super(AuthInitial()) {
+
+    // 🔹 Listen to AuthService
+    _authSub = authService.stream.listen((event) {
+      if (event == AuthEventType.logout) {
+        add(LogoutRequested());
+      } else if (event == AuthEventType.tokenExpired) {
+        add(RefreshTokenRequested());
+      } else if(event == AuthEventType.invalidCredentials) {
+        add(InvalidCredentials("Invalid Credentials"));
+      }
+    });
+
+
     on<LoginRequested>((event, emit) async {
       emit(AuthLoading());
       try {
@@ -61,8 +80,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<RefreshTokenRequested>((event, emit) async {
+      // on refresh token request we don't need old access token so delete it.
+      await secureStorage.delete(key: 'accessToken');
       final refreshToken = await secureStorage.read(key: 'refreshToken');
       if (refreshToken == null) {
+        authService.notifyRefreshFailure();
         emit(AuthUnauthenticated());
         return;
       }
@@ -72,8 +94,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await secureStorage.write(key: 'accessToken', value: newTokens.accessToken);
         await secureStorage.write(key: 'refreshToken', value: newTokens.refreshToken);
 
+        authService.notifyRefreshSuccess(); // 👈 tell ApiClient refresh is done
+
         emit(AuthAuthenticated(newTokens.accessToken));
+
       } catch (_) {
+        authService.notifyRefreshFailure(); // 👈 fail waiting requests
         emit(AuthUnauthenticated());
       }
     });
@@ -81,5 +107,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<InvalidCredentials>((event, emit) {
       emit(AuthError(event.error));
     });
+  }
+
+  @override
+  Future<void> close() {
+    _authSub.cancel();
+    return super.close();
   }
 }

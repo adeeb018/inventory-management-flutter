@@ -11,8 +11,11 @@ import 'package:inventory_management/features/auth/domain/usecases/refresh_token
 import 'package:inventory_management/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:inventory_management/features/auth/presentation/bloc/auth_event.dart';
 import 'app_router.dart';
+import 'injection.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  setupDependencies();
   runApp(const MyApp());
 }
 
