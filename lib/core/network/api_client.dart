@@ -29,12 +29,14 @@ class ApiClient {
 
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
-          logger.d('[ApiClient] Added Authorization header to request: ${options.path}');
+          logger.d(
+              '[ApiClient] Added Authorization header to request: ${options.path}');
         }
         return handler.next(options);
       },
       onError: (DioError error, handler) async {
-        logger.d('[ApiClient] onError called for: ${error.requestOptions.path}');
+        logger
+            .d('[ApiClient] onError called for: ${error.requestOptions.path}');
         logger.d('[ApiClient] Status code: ${error.response?.statusCode}');
         logger.d('[ApiClient] Error message: ${error.message}');
 
@@ -43,7 +45,8 @@ class ApiClient {
           final errorBody = error.response?.data['error'];
           logger.d(errorBody);
           if (errorBody == 'Invalid or expired token') {
-            logger.d('[ApiClient] 401 detected. Attempting to refresh token...');
+            logger
+                .d('[ApiClient] 401 detected. Attempting to refresh token...');
             authService.notify(AuthEventType.tokenExpired);
             try {
               await authService.waitForRefresh(); // 👈 wait for Bloc refresh
@@ -51,7 +54,8 @@ class ApiClient {
 
               // Retry with new token
               if (newToken != null) {
-                error.requestOptions.headers['Authorization'] = 'Bearer $newToken';
+                error.requestOptions.headers['Authorization'] =
+                    'Bearer $newToken';
                 final retryResponse = await dio.fetch(error.requestOptions);
                 return handler.resolve(retryResponse);
               } else {
@@ -59,7 +63,6 @@ class ApiClient {
                 authService.notify(AuthEventType.logout);
                 return;
               }
-
             } catch (_) {
               // Refresh failed
               return handler.next(error);
@@ -73,7 +76,6 @@ class ApiClient {
             authService.notify(AuthEventType.logout);
             return;
           }
-
         }
 
         logger.d('[ApiClient] Passing error to next interceptor/handler');

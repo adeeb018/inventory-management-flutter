@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:inventory_management/core/constants.dart';
 import 'package:inventory_management/core/network/api_client.dart';
 import 'package:inventory_management/features/auth/data/repositories/auth_repository_impl.dart';
@@ -44,10 +45,18 @@ class MyApp extends StatelessWidget {
           secureStorage: secureStorage,
         )..add(AppStarted()),
         child: MaterialApp.router(
+          debugShowCheckedModeBanner: false,
           title: 'Projects',
           routerConfig: appRouter.router,
+          // theme: ThemeData(
+          //   colorSchemeSeed: Colors.blue,
+          //   useMaterial3: true,
+          // ),
           theme: ThemeData(
-            colorSchemeSeed: Colors.blue,
+            textTheme: GoogleFonts.interTextTheme(
+              Theme.of(context).textTheme,
+            ),
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
             useMaterial3: true,
           ),
         ),

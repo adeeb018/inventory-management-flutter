@@ -18,7 +18,6 @@ class ProjectsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     // Initialize repository and use-case
     final apiClient = context.read<ApiClient>();
     final repository = ProjectsRepositoryImpl(apiClient: apiClient);
@@ -33,8 +32,9 @@ class ProjectsPage extends StatelessWidget {
         ),
       ],
       child: BlocProvider(
-        create: (_) => ProjectsBloc(getProjects: getProjects) // ✅ pass use-case here
-          ..add(FetchProjects()),
+        create: (_) =>
+            ProjectsBloc(getProjects: getProjects) // ✅ pass use-case here
+              ..add(FetchProjects()),
         child: Scaffold(
           appBar: AppBar(
             title: const Text('Projects'),

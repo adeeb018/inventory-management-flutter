@@ -2,15 +2,13 @@ import '../../../../core/network/api_client.dart';
 import '../models/part_report_model.dart';
 
 abstract class PartReportRepository {
-  Future<List<PartReport>>  fetchPartReport(int projectId);
+  Future<List<PartReport>> fetchPartReport(int projectId);
 }
 
 class PartReportRepositoryImpl implements PartReportRepository {
-
   final ApiClient apiClient;
 
   PartReportRepositoryImpl({required this.apiClient});
-
 
   @override
   Future<List<PartReport>> fetchPartReport(int projectId) async {

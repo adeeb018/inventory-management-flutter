@@ -1,7 +1,7 @@
 // core/auth/auth_service.dart
 import 'dart:async';
 
-enum AuthEventType { logout, tokenExpired , invalidCredentials}
+enum AuthEventType { logout, tokenExpired, invalidCredentials }
 
 class AuthService {
   final _controller = StreamController<AuthEventType>.broadcast();
@@ -12,8 +12,6 @@ class AuthService {
   void notify(AuthEventType event) {
     _controller.add(event);
   }
-
-
 
   /// Called by Bloc after refresh success
   void notifyRefreshSuccess() {

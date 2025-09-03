@@ -16,7 +16,6 @@ class PartReportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     // Initialize repository and use-case
     final apiClient = context.read<ApiClient>();
     final repository = PartReportRepositoryImpl(apiClient: apiClient);
@@ -54,17 +53,20 @@ class PartReportPage extends StatelessWidget {
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 6),
                     child: ListTile(
-                      title: Text('${part.partNumber} — ${part.partDescription}'),
+                      title:
+                          Text('${part.partNumber} — ${part.partDescription}'),
                       subtitle: Text(
                         'Mfr: ${part.manufacturer}  |  Type: ${part.partType}\n'
-                            'MPN: ${part.manufacturerPartNumber}',
+                        'MPN: ${part.manufacturerPartNumber}',
                       ),
                       isThreeLine: true,
                       trailing: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text('Qty', style: TextStyle(fontSize: 12)),
-                          Text('${part.quantityUsed}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                          Text('${part.quantityUsed}',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),

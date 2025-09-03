@@ -10,9 +10,9 @@ class GetProjects {
     final rawProjects = await repository.fetchProjects();
     return rawProjects
         .map((e) => ProjectEntity(
-      id: e['project_id'] ?? e['id'],
-      name: e['name'] ?? 'Unnamed',
-    ))
+              id: e['project_id'] ?? e['id'],
+              name: e['name'] ?? 'Unnamed',
+            ))
         .toList();
   }
 }

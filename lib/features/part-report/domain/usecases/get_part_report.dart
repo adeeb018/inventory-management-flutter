@@ -10,13 +10,13 @@ class GetPartReport {
     final list = await repository.fetchPartReport(projectId);
     return list
         .map((p) => PartReportEntity(
-      manufacturerPartNumber: p.manufacturerPartNumber,
-      partNumber: p.partNumber,
-      partDescription: p.partDescription,
-      partType: p.partType,
-      manufacturer: p.manufacturer,
-      quantityUsed: p.quantityUsed,
-    ))
+              manufacturerPartNumber: p.manufacturerPartNumber,
+              partNumber: p.partNumber,
+              partDescription: p.partDescription,
+              partType: p.partType,
+              manufacturer: p.manufacturer,
+              quantityUsed: p.quantityUsed,
+            ))
         .toList();
   }
 }

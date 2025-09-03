@@ -22,19 +22,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthService authService = GetIt.I<AuthService>();
   late final StreamSubscription _authSub;
 
-  AuthBloc({required this.loginUser, required this.logoutUser, required this.secureStorage, required this.refreshTokenUseCase}) : super(AuthInitial()) {
-
+  AuthBloc(
+      {required this.loginUser,
+      required this.logoutUser,
+      required this.secureStorage,
+      required this.refreshTokenUseCase})
+      : super(AuthInitial()) {
     // 🔹 Listen to AuthService
     _authSub = authService.stream.listen((event) {
       if (event == AuthEventType.logout) {
         add(LogoutRequested());
       } else if (event == AuthEventType.tokenExpired) {
         add(RefreshTokenRequested());
-      } else if(event == AuthEventType.invalidCredentials) {
+      } else if (event == AuthEventType.invalidCredentials) {
         add(InvalidCredentials("Invalid Credentials"));
       }
     });
-
 
     on<LoginRequested>((event, emit) async {
       emit(AuthLoading());
@@ -63,7 +66,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthUnauthenticated());
     });
 
-
     // Handle App Start (Check if token exists in secure storage)
     on<AppStarted>((event, emit) async {
       emit(AuthLoading());
@@ -91,13 +93,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       try {
         final newTokens = await refreshTokenUseCase(refreshToken);
-        await secureStorage.write(key: 'accessToken', value: newTokens.accessToken);
-        await secureStorage.write(key: 'refreshToken', value: newTokens.refreshToken);
+        await secureStorage.write(
+            key: 'accessToken', value: newTokens.accessToken);
+        await secureStorage.write(
+            key: 'refreshToken', value: newTokens.refreshToken);
 
         authService.notifyRefreshSuccess(); // 👈 tell ApiClient refresh is done
 
         emit(AuthAuthenticated(newTokens.accessToken));
-
       } catch (_) {
         authService.notifyRefreshFailure(); // 👈 fail waiting requests
         emit(AuthUnauthenticated());

@@ -1,4 +1,3 @@
-
 import '../../../../core/network/api_client.dart';
 
 abstract class ProjectsRepository {
@@ -6,7 +5,6 @@ abstract class ProjectsRepository {
 }
 
 class ProjectsRepositoryImpl implements ProjectsRepository {
-
   final ApiClient apiClient;
 
   ProjectsRepositoryImpl({required this.apiClient});
