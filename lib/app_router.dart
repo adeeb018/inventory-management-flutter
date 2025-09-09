@@ -8,6 +8,7 @@ import 'features/auth/presentation/pages/login_page.dart';
 
 import 'features/home/home_page.dart';
 import 'features/part-report/presentation/pages/part_report_page.dart';
+import 'features/parts/presentation/pages/part_details.dart';
 import 'features/parts/presentation/pages/parts_page.dart';
 import 'features/projects/presentation/pages/projects_page.dart';
 
@@ -67,6 +68,21 @@ class AppRouter {
               path: '/parts',
               pageBuilder: (context, state) =>
                   const NoTransitionPage(child: PartsPage()),
+              routes: [
+                GoRoute(
+                    // path: ':partId',
+                    path: ':partId/:partNumber',
+                    pageBuilder: (context, state) {
+                      final partId = state.pathParameters['partId']!;
+                      final partNumber = state.pathParameters['partNumber'];
+                      return NoTransitionPage(
+                        child: PartDetailPage(
+                          partId: partId,
+                          partNumber: partNumber ?? '',
+                        ),
+                      );
+                    }),
+              ],
             ),
             GoRoute(
               path: '/composite-items',
@@ -80,6 +96,21 @@ class AppRouter {
             ),
           ],
         ),
+
+        // GoRoute(
+        //     path: '/parts/:partId',
+        //     // builder: (context, state) {
+        //     //   final partId = state.pathParameters['partId']!;
+        //     //   return HomePage(
+        //     //     child: PartDetailPage(partId: partId),
+        //     //   );
+        //     // },
+        //     pageBuilder: (context, state) {
+        //       final partId = state.pathParameters['partId']!;
+        //       return NoTransitionPage(
+        //         child: PartDetailPage(partId: partId),
+        //       );
+        //     }),
       ],
     );
   }

@@ -267,6 +267,11 @@ class PartsPage extends StatelessWidget {
                             final isEven = index % 2 == 0;
 
                             return DataRow(
+                              // onSelectChanged: (selected) {
+                              //   if (selected == true) {
+                              //     context.go('/parts/${part.partId}');
+                              //   }
+                              // },
                               color: MaterialStateProperty.all(
                                 isEven ? Colors.white : Colors.grey[25],
                               ),
@@ -300,6 +305,11 @@ class PartsPage extends StatelessWidget {
                                       color: Colors.grey[800],
                                     ),
                                   ),
+                                  onTap: () {
+                                    // context.go('/parts/${part.partId}');
+                                    context.push(
+                                        '/parts/${part.partId}/${Uri.encodeComponent(part.partNumber ?? '')}');
+                                  },
                                 ),
                                 DataCell(
                                   Text(
@@ -311,6 +321,9 @@ class PartsPage extends StatelessWidget {
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
+                                  onTap: () {
+                                    context.go('/parts/${part.partId}');
+                                  },
                                 ),
                                 DataCell(
                                   Container(
@@ -333,6 +346,9 @@ class PartsPage extends StatelessWidget {
                                       ),
                                     ),
                                   ),
+                                  onTap: () {
+                                    context.go('/parts/${part.partId}');
+                                  },
                                 ),
                               ],
                             );
