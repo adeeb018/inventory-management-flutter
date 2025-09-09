@@ -1,4 +1,5 @@
 import 'package:inventory_management/core/constants.dart';
+import 'dart:convert';
 
 import '../../../../core/network/api_client.dart';
 import '../../domain/entities/part_details.dart';
@@ -14,9 +15,16 @@ class PartDetailsRepositoryImpl implements PartDetailsRepository {
     try {
       final res =
           await apiClient.dio.get(AppConstants.getPartDetailsUrl(partNumber));
-      return partReportModelFromJson(res.data);
+      final data = res.data;
+      if (data is String) {
+        return partReportModelFromJson(data);
+      } else if (data is Map<String, dynamic>) {
+        return PartDetails.fromJson(data);
+      } else {
+        return PartDetails.fromJson(Map<String, dynamic>.from(data));
+      }
     } catch (e) {
-      throw Exception('Login failed: $e');
+      throw Exception('Part details fetch failed: $e');
     }
   }
 }

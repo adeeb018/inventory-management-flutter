@@ -16,6 +16,6 @@ class AppConstants {
 
   static const String getPartsUrl = '/parts';
   static String getPartDetailsUrl(String partNumber) {
-    return 'parts/details/$partNumber';
+    return '/parts/details/$partNumber';
   }
 }
