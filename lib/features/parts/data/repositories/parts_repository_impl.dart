@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:inventory_management/core/constants.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../domain/entities/parts.dart';
@@ -12,7 +12,7 @@ class PartsRepositoryImpl implements PartsRepository {
   @override
   Future<List<Parts>> getAllParts() async {
     try {
-      final res = await apiClient.dio.get('/parts');
+      final res = await apiClient.dio.get(AppConstants.getPartsUrl);
       final List<dynamic> data = res.data;
       return data
           .map((item) => Parts(

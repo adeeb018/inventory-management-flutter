@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:inventory_management/core/constants.dart';
 import 'package:inventory_management/core/network/api_client.dart';
 import 'package:inventory_management/features/auth/domain/entities/user_token.dart';
 import 'package:logger/logger.dart';
@@ -13,7 +14,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<UserToken> login(String username, String password) async {
     try {
-      final res = await apiClient.dio.post('/auth/login', data: {
+      final res = await apiClient.dio.post(AppConstants.loginUrl, data: {
         'username': username,
         'password': password,
       });
@@ -38,7 +39,8 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       log("INSIDE REFRESH TOKEN IMPL");
 
-      final response = await apiClient.dio.post('/auth/refresh', data: {
+      final response =
+          await apiClient.dio.post(AppConstants.refreshTokenUrl, data: {
         'refreshToken': refreshToken,
       });
 

@@ -4,3 +4,5 @@ part of 'parts_bloc.dart';
 sealed class PartsEvent {}
 
 class GetAllParts extends PartsEvent {}
+
+class GetPartDetails extends PartsEvent {}

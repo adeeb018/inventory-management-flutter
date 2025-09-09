@@ -8,7 +8,7 @@ import 'features/auth/presentation/pages/login_page.dart';
 
 import 'features/home/home_page.dart';
 import 'features/part-report/presentation/pages/part_report_page.dart';
-import 'features/parts/presentation/pages/part_details.dart';
+import 'features/part_details/presentation/pages/part_details_page.dart';
 import 'features/parts/presentation/pages/parts_page.dart';
 import 'features/projects/presentation/pages/projects_page.dart';
 

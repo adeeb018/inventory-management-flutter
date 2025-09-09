@@ -1,3 +1,5 @@
+import 'package:inventory_management/core/constants.dart';
+
 import '../../../../core/network/api_client.dart';
 
 abstract class ProjectsRepository {
@@ -11,7 +13,7 @@ class ProjectsRepositoryImpl implements ProjectsRepository {
 
   @override
   Future<List<Map<String, dynamic>>> fetchProjects() async {
-    final res = await apiClient.dio.get('/projects');
+    final res = await apiClient.dio.get(AppConstants.getProjectsUrl);
     final data = res.data as List;
     return data.map((e) => Map<String, dynamic>.from(e)).toList();
   }
