@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:inventory_management/features/auth/domain/entities/user_token.dart';
 import 'package:inventory_management/features/auth/domain/usecases/refresh_token.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../../../core/auth/auth_service.dart';

@@ -13,12 +13,6 @@ class PartsBloc extends Bloc<PartsEvent, PartsState> {
       emit(PartsLoading());
       try {
         final getParts = await getPartsUseCase.call();
-        // accessToken = userToken.accessToken;
-        // refreshToken = userToken.refreshToken;
-        // save securely
-        // await secureStorage.write(key: 'auth_token', value: token);
-        // await secureStorage.write(key: 'accessToken', value: accessToken);
-        // await secureStorage.write(key: 'refreshToken', value: refreshToken);
         emit(PartsLoaded(getParts));
       } catch (e) {
         emit(PartsError(e.toString()));

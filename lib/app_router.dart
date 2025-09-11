@@ -6,11 +6,9 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 
-import 'shared/presentation/pages/home_page.dart';
-import 'features/part-report/presentation/pages/part_report_page.dart';
+import 'shared/presentation/pages/side_menu.dart';
 import 'features/part_details/presentation/pages/part_details_page.dart';
 import 'features/parts/presentation/pages/parts_page.dart';
-import 'features/projects/presentation/pages/projects_page.dart';
 
 class AppRouter {
   late final GoRouter router;
@@ -27,25 +25,6 @@ class AppRouter {
         if (loggedIn && loggingIn) return '/parts';
         return null;
       },
-      // routes: [
-      //   GoRoute(
-      //     path: '/login',
-      //     builder: (context, state) => const LoginPage(),
-      //   ),
-      //   GoRoute(path: '/parts', builder: (context, state) => const PartsPage()),
-      //   GoRoute(
-      //     path: '/projects',
-      //     builder: (context, state) => const ProjectsPage(),
-      //     routes: [
-      //       GoRoute(
-      //         path: ':id/part-report',
-      //         builder: (context, state) {
-      //           final id = int.parse(state.pathParameters['id']!);
-      //           return PartReportPage(projectId: id);
-      //         },
-      //       ),
-      //     ],
-      //   ),
       routes: [
         /// Login route
         GoRoute(
@@ -56,7 +35,7 @@ class AppRouter {
         /// Shell (NavigationRail layout)
         ShellRoute(
           builder: (context, state, child) {
-            return HomePage(child: child); // NavigationRail wrapper
+            return SideMenu(child: child); // NavigationRail wrapper
           },
           routes: [
             GoRoute(
@@ -96,21 +75,6 @@ class AppRouter {
             ),
           ],
         ),
-
-        // GoRoute(
-        //     path: '/parts/:partId',
-        //     // builder: (context, state) {
-        //     //   final partId = state.pathParameters['partId']!;
-        //     //   return HomePage(
-        //     //     child: PartDetailPage(partId: partId),
-        //     //   );
-        //     // },
-        //     pageBuilder: (context, state) {
-        //       final partId = state.pathParameters['partId']!;
-        //       return NoTransitionPage(
-        //         child: PartDetailPage(partId: partId),
-        //       );
-        //     }),
       ],
     );
   }
