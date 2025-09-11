@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/network/api_client.dart';
+import '../../../../shared/presentation/ui_helper.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -45,320 +46,23 @@ class PartsPage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+        decoration: cardDecoration(),
         child: BlocBuilder<PartsBloc, PartsState>(
           builder: (context, state) {
             if (state is PartsLoading) {
-              return Container(
-                height: 400,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(
-                        color: Color(0xFF1565C0),
-                        strokeWidth: 2,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Loading parts...',
-                        style: GoogleFonts.inter(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              return const PartsLoadingView();
             }
 
             if (state is PartsError) {
-              return Container(
-                height: 400,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: Colors.red[300],
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Something went wrong',
-                        style: GoogleFonts.inter(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        state.message,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              return PartsErrorView(message: state.message);
             }
 
             if (state is PartsLoaded) {
               if (state.parts.isEmpty) {
-                return Container(
-                  height: 400,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.inventory_2_outlined,
-                          size: 64,
-                          color: Colors.grey[300],
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          'No parts found',
-                          style: GoogleFonts.inter(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Add your first part to get started',
-                          style: GoogleFonts.inter(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+                return const PartsEmptyView();
               }
 
-              return Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Header with search and add button
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CustomSearchBar(
-                            hintText: "Search parts...",
-                            onChanged: (query) {
-                              print("Searching: $query");
-                            },
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        ElevatedButton.icon(
-                          onPressed: () async {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF1565C0),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            minimumSize: const Size(0, 48),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 12,
-                            ),
-                            elevation: 0,
-                            shadowColor: Colors.transparent,
-                          ),
-                          icon: const Icon(Icons.add, size: 18),
-                          label: Text(
-                            'Add Part',
-                            style: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 24),
-
-                    // Enhanced DataTable
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[200]!),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: DataTable(
-                          headingRowHeight: 56,
-                          dataRowMinHeight: 48,
-                          dataRowMaxHeight: 48,
-                          columnSpacing: 24,
-                          horizontalMargin: 24,
-                          headingRowColor:
-                              MaterialStateProperty.all(Colors.grey[50]),
-                          dividerThickness: 1,
-                          columns: [
-                            // DataColumn(
-                            //   label: Text(
-                            //     'Part ID',
-                            //     style: GoogleFonts.inter(
-                            //       fontWeight: FontWeight.w600,
-                            //       fontSize: 13,
-                            //       color: Colors.grey[700],
-                            //     ),
-                            //   ),
-                            // ),
-                            DataColumn(
-                              label: Text(
-                                'Part Number',
-                                style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Description',
-                                style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Part Type',
-                                style: GoogleFonts.inter(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                          ],
-                          rows: state.parts.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final part = entry.value;
-                            final isEven = index % 2 == 0;
-
-                            return DataRow(
-                              // onSelectChanged: (selected) {
-                              //   if (selected == true) {
-                              //     context.go('/parts/${part.partId}');
-                              //   }
-                              // },
-                              color: MaterialStateProperty.all(
-                                isEven ? Colors.white : Colors.grey[25],
-                              ),
-                              cells: [
-                                // DataCell(
-                                //   Container(
-                                //     padding: EdgeInsets.symmetric(
-                                //       horizontal: 8,
-                                //       vertical: 4,
-                                //     ),
-                                //     decoration: BoxDecoration(
-                                //       color: Color(0xFF1565C0).withOpacity(0.1),
-                                //       borderRadius: BorderRadius.circular(6),
-                                //     ),
-                                //     child: Text(
-                                //       '#${part.partId}',
-                                //       style: GoogleFonts.inter(
-                                //         fontSize: 13,
-                                //         fontWeight: FontWeight.w500,
-                                //         color: Color(0xFF1565C0),
-                                //       ),
-                                //     ),
-                                //   ),
-                                // ),
-                                DataCell(
-                                  Text(
-                                    part.partNumber ?? "-",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.grey[800],
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    // context.go('/parts/${part.partId}');
-                                    context.push(
-                                        '/parts/${part.partId}/${Uri.encodeComponent(part.partNumber ?? '')}');
-                                  },
-                                ),
-                                DataCell(
-                                  Text(
-                                    part.description ?? "-",
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14,
-                                      color: Colors.grey[700],
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  onTap: () {
-                                    context.go('/parts/${part.partId}');
-                                  },
-                                ),
-                                DataCell(
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[100],
-                                      borderRadius: BorderRadius.circular(8),
-                                      border:
-                                          Border.all(color: Colors.grey[200]!),
-                                    ),
-                                    child: Text(
-                                      part.partType ?? "N/A",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.grey[700],
-                                      ),
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    context.go('/parts/${part.partId}');
-                                  },
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
+              return PartsTableView(partsState: state);
             }
             return const SizedBox.shrink();
           },
@@ -451,7 +155,7 @@ class PartsPage extends StatelessWidget {
             ),
           ),
         ),
-        PopupMenuDivider(),
+        const PopupMenuDivider(),
         PopupMenuItem<String>(
           value: 'logout',
           child: ListTile(
@@ -470,6 +174,287 @@ class PartsPage extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+class PartsLoadingView extends StatelessWidget {
+  const PartsLoadingView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 400,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(
+              color: Color(0xFF1565C0),
+              strokeWidth: 2,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Loading parts...',
+              style: GoogleFonts.inter(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PartsErrorView extends StatelessWidget {
+  final String message;
+  const PartsErrorView({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 400,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.red[300],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Something went wrong',
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PartsEmptyView extends StatelessWidget {
+  const PartsEmptyView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 400,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inventory_2_outlined,
+              size: 64,
+              color: Colors.grey[300],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No parts found',
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Add your first part to get started',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PartsTableView extends StatelessWidget {
+  final PartsLoaded partsState;
+  const PartsTableView({super.key, required this.partsState});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: CustomSearchBar(
+                  hintText: "Search parts...",
+                  onChanged: (query) {},
+                ),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
+                onPressed: () async {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1565C0),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  minimumSize: const Size(0, 48),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  elevation: 0,
+                  shadowColor: Colors.transparent,
+                ),
+                icon: const Icon(Icons.add, size: 18),
+                label: Text(
+                  'Add Part',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[200]!),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: DataTable(
+                headingRowHeight: 56,
+                dataRowMinHeight: 48,
+                dataRowMaxHeight: 48,
+                columnSpacing: 24,
+                horizontalMargin: 24,
+                headingRowColor: MaterialStateProperty.all(Colors.grey[50]),
+                dividerThickness: 1,
+                columns: [
+                  DataColumn(
+                    label: Text(
+                      'Part Number',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Description',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Part Type',
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                ],
+                rows: partsState.parts.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final part = entry.value;
+                  final isEven = index % 2 == 0;
+
+                  return DataRow(
+                    color: MaterialStateProperty.all(
+                      isEven ? Colors.white : Colors.grey[25],
+                    ),
+                    cells: [
+                      DataCell(
+                        Text(
+                          part.partNumber ?? "-",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[800],
+                          ),
+                        ),
+                        onTap: () {
+                          context.push(
+                              '/parts/${part.partId}/${Uri.encodeComponent(part.partNumber ?? '')}');
+                        },
+                      ),
+                      DataCell(
+                        Text(
+                          part.description ?? "-",
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            color: Colors.grey[700],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () {
+                          context.go('/parts/${part.partId}');
+                        },
+                      ),
+                      DataCell(
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey[200]!),
+                          ),
+                          child: Text(
+                            part.partType ?? "N/A",
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ),
+                        onTap: () {
+                          context.go('/parts/${part.partId}');
+                        },
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
