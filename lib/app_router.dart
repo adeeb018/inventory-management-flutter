@@ -6,7 +6,7 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 
-import 'features/home/home_page.dart';
+import 'shared/presentation/pages/home_page.dart';
 import 'features/part-report/presentation/pages/part_report_page.dart';
 import 'features/part_details/presentation/pages/part_details_page.dart';
 import 'features/parts/presentation/pages/parts_page.dart';
