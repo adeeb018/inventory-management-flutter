@@ -311,7 +311,7 @@ class PartsTableView extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               ElevatedButton.icon(
-                onPressed: () async {},
+                onPressed: () => context.push('/add-part'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1565C0),
                   foregroundColor: Colors.white,
@@ -444,7 +444,8 @@ class PartsTableView extends StatelessWidget {
                           ),
                         ),
                         onTap: () {
-                          context.go('/parts/${part.partId}');
+                          context.push(
+                              '/parts/${part.partId}/${Uri.encodeComponent(part.partNumber ?? '')}');
                         },
                       ),
                     ],

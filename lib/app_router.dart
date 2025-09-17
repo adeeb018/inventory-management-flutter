@@ -9,6 +9,7 @@ import 'features/auth/presentation/pages/login_page.dart';
 import 'shared/presentation/pages/side_menu.dart';
 import 'features/part_details/presentation/pages/part_details_page.dart';
 import 'features/parts/presentation/pages/parts_page.dart';
+import 'features/add_parts/presentation/pages/add_part_page.dart';
 
 class AppRouter {
   late final GoRouter router;
@@ -62,6 +63,11 @@ class AppRouter {
                       );
                     }),
               ],
+            ),
+            GoRoute(
+              path: '/add-part',
+              pageBuilder: (context, state) =>
+                  const NoTransitionPage(child: AddPartPage()),
             ),
             GoRoute(
               path: '/composite-items',

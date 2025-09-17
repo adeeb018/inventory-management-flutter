@@ -86,7 +86,7 @@ class PartDetailPage extends StatelessWidget {
 
   SingleChildScrollView _partDetailsWidget(PartDetails details) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
