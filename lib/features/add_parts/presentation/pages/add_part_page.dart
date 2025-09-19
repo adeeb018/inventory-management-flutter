@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../shared/presentation/ui_helper.dart';
 import '../../../../shared/presentation/widgets/custom_dropdown.dart';
 import '../../../../shared/presentation/widgets/custom_text_field.dart';
+import '../../../../shared/presentation/widgets/custom_widgets/custom_dropdown_menu.dart';
 
 class AddPartPage extends StatefulWidget {
   const AddPartPage({super.key});
@@ -17,6 +18,7 @@ class _AddPartPageState extends State<AddPartPage> {
   final _manufacturerPartNumberController = TextEditingController();
   final _currentStockController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final TextEditingController _newItemController = TextEditingController();
 
   // Dropdown values
   String? _selectedManufacturer;
@@ -157,47 +159,99 @@ class _AddPartPageState extends State<AddPartPage> {
   }
 
   Widget _buildManufacturerDropdown() {
-    return CustomDropdown<String>(
-      label: 'Manufacturer Name',
-      hint: 'Select manufacturer',
-      icon: Icons.business,
-      value: _selectedManufacturer,
-      items: DropdownData.getManufacturers().map((manufacturer) {
-        return DropdownMenuItem<String>(
-          value: manufacturer,
-          child: Text(manufacturer),
-        );
-      }).toList(),
-      onChanged: (value) {
+    // return EnhancedCustomDropdown<String>(
+    //   label: 'Manufacturer Name',
+    //   hint: 'Select manufacturer',
+    //   icon: Icons.business,
+    //   value: _selectedManufacturer,
+    //   items: DropdownData.getManufacturers(),
+    //   onChanged: (value) {
+    //     setState(() {
+    //       _selectedManufacturer = value;
+    //     });
+    //   },
+    //   onAddNew: (newManufacturer) {
+    //     // Add new manufacturer to the list
+    //     setState(() {
+    //       _selectedManufacturer = newManufacturer;
+    //     });
+    //     // In a real app, you would save this to your data source
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text('Added new manufacturer: $newManufacturer'),
+    //         backgroundColor: Colors.green,
+    //         behavior: SnackBarBehavior.floating,
+    //       ),
+    //     );
+    //   },
+    //   validator: (value) {
+    //     if (value == null || value.isEmpty) {
+    //       return 'Please select manufacturer';
+    //     }
+    //     return null;
+    //   },
+    // );
+    return CustomDropdownMenu<String>(
+      width: MediaQuery.of(context).size.width - 32,
+      menuHeight: 200,
+      hintText: 'Search and select part type...',
+      leadingIcon: const Icon(Icons.category),
+      enableSearch: true,
+      enableFilter: true,
+      requestFocusOnTap: true,
+      inputDecorationTheme: const InputDecorationTheme(
+        border: OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+      ),
+      onSelected: (String? value) {
         setState(() {
           _selectedManufacturer = value;
         });
       },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select manufacturer';
-        }
-        return null;
+      addItemBtnTitle: 'New Manufacturer',
+      onItemBtnClicked: () {
+        debugPrint('add item button clicked');
+        _showAddNewDialog(context);
       },
+      dropdownMenuEntries: DropdownData.getPartTypes()
+          .map<CustomDropdownMenuEntry<String>>((String partType) {
+        return CustomDropdownMenuEntry<String>(
+          value: partType,
+          label: partType,
+          leadingIcon: const Icon(Icons.widgets, size: 18),
+        );
+      }).toList(),
     );
   }
 
   Widget _buildPartTypeDropdown() {
-    return CustomDropdown<String>(
+    return EnhancedCustomDropdown<String>(
       label: 'Part Type',
       hint: 'Select part type',
       icon: Icons.category,
       value: _selectedPartType,
-      items: DropdownData.getPartTypes().map((partType) {
-        return DropdownMenuItem<String>(
-          value: partType,
-          child: Text(partType),
-        );
-      }).toList(),
+      items: DropdownData.getPartTypes(),
       onChanged: (value) {
         setState(() {
           _selectedPartType = value;
         });
+      },
+      onAddNew: (newPartType) {
+        // Add new part type to the list
+        setState(() {
+          _selectedPartType = newPartType;
+        });
+        // In a real app, you would save this to your data source
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added new part type: $newPartType'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       },
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -441,5 +495,45 @@ class _AddPartPageState extends State<AddPartPage> {
       );
       context.go('/parts');
     }
+  }
+
+  void _showAddNewDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add New Item'),
+          content: TextField(
+            controller: _newItemController,
+            decoration: const InputDecoration(
+              hintText: 'Enter item name',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // close popup
+                _newItemController.clear();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final String value = _newItemController.text.trim();
+                if (value.isNotEmpty) {
+                  // 🔹 Here you can add logic to save the item
+                  // and maybe automatically select it.
+                  print('Saved & Selected: $value');
+                }
+                Navigator.of(context).pop(); // close popup
+                _newItemController.clear();
+              },
+              child: const Text('Save & Select'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
