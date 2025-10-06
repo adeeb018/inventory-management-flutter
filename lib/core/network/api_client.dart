@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:inventory_management/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:inventory_management/features/auth/presentation/bloc/auth_event.dart';
 import 'package:inventory_management/features/auth/presentation/bloc/auth_state.dart';
 import 'package:logger/logger.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import '../auth/auth_service.dart';
 
@@ -15,6 +17,16 @@ class ApiClient {
   final AuthService authService = GetIt.I<AuthService>();
 
   ApiClient(this.dio, this.secureStorage) {
+    if (kDebugMode) {
+      dio.interceptors.add(PrettyDioLogger(
+          requestHeader: true,
+          requestBody: true,
+          responseBody: true,
+          responseHeader: false,
+          error: true,
+          compact: true,
+          maxWidth: 90));
+    }
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         logger.d('[ApiClient] onRequest called for: ${options.path}');

@@ -13,10 +13,12 @@ import 'package:inventory_management/features/auth/presentation/bloc/auth_bloc.d
 import 'package:inventory_management/features/auth/presentation/bloc/auth_event.dart';
 import 'app_router.dart';
 import 'injection.dart';
+import 'shared/presentation/bloc/bloc_observer.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   setupDependencies();
+  Bloc.observer = AppBlocObserver();
   runApp(const MyApp());
 }
 

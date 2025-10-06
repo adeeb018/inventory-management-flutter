@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:inventory_management/shared/presentation/widgets/error_widget.dart';
 
 import '../../../../core/network/api_client.dart';
 import '../../../../shared/presentation/ui_helper.dart';
@@ -54,7 +55,7 @@ class PartsPage extends StatelessWidget {
             }
 
             if (state is PartsError) {
-              return PartsErrorView(message: state.message);
+              return ErrorView(message: state.message);
             }
 
             if (state is PartsLoaded) {
@@ -200,48 +201,6 @@ class PartsLoadingView extends StatelessWidget {
                 color: Colors.grey[600],
                 fontSize: 14,
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PartsErrorView extends StatelessWidget {
-  final String message;
-  const PartsErrorView({super.key, required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 400,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Colors.red[300],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Something went wrong',
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),

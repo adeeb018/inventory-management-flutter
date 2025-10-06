@@ -15,7 +15,13 @@ class AppConstants {
   static const String getProjectsUrl = '/projects';
 
   static const String getPartsUrl = '/parts';
+  static const String addParts = '/parts';
+
   static String getPartDetailsUrl(String partNumber) {
     return '/parts/details/$partNumber';
+  }
+
+  static String getPartDataUrl(String partNumber) {
+    return '/parts/search?part_number=$partNumber';
   }
 }

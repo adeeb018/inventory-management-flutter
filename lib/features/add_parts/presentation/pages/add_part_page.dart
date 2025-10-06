@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:inventory_management/features/add_parts/data/repositories/add_part_repository_impl.dart';
+import 'package:inventory_management/features/add_parts/domain/usecases/add_parts_usecase.dart';
+import 'package:inventory_management/features/add_parts/presentation/bloc/add_part_bloc.dart';
+import '../../../../core/network/api_client.dart';
 import '../../../../shared/presentation/ui_helper.dart';
 import '../../../../shared/presentation/widgets/custom_dropdown.dart';
 import '../../../../shared/presentation/widgets/custom_text_field.dart';
 import '../../../../shared/presentation/widgets/custom_widgets/custom_dropdown_menu.dart';
+import '../../../../shared/presentation/widgets/error_widget.dart';
+import '../../domain/models/part_data/part_data.dart';
 
 class AddPartPage extends StatefulWidget {
   const AddPartPage({super.key});
@@ -15,7 +22,9 @@ class AddPartPage extends StatefulWidget {
 
 class _AddPartPageState extends State<AddPartPage> {
   final _formKey = GlobalKey<FormState>();
+  final _internalPartNumberController = TextEditingController();
   final _manufacturerPartNumberController = TextEditingController();
+  final _partCostController = TextEditingController();
   final _currentStockController = TextEditingController();
   final _descriptionController = TextEditingController();
   final TextEditingController _newItemController = TextEditingController();
@@ -27,6 +36,22 @@ class _AddPartPageState extends State<AddPartPage> {
   String? _selectedLocation;
   String? _selectedRack;
   String? _selectedAlternatePartNumber;
+
+// ignore: prefer_typing_uninitialized_variables
+  late final ApiClient _apiClient;
+  late final AddPartRepositoryImpl _repository;
+  late final GetPartDataUseCase _getPartData;
+  late final AddPartBloc _addPartBloc;
+
+  @override
+  void initState() {
+    _apiClient = context.read<ApiClient>();
+    _repository = AddPartRepositoryImpl(apiClient: _apiClient);
+    _getPartData = GetPartDataUseCase(_repository);
+    _addPartBloc = AddPartBloc(getPartDataUseCase: _getPartData);
+    // _addPartBloc.add(GetPartData(partNumber: partNumber));
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -77,6 +102,25 @@ class _AddPartPageState extends State<AddPartPage> {
   }
 
   Widget _scaffoldBody() {
+    // return BlocConsumer<AddPartBloc, AddPartState>(
+    //   bloc: _addPartBloc,
+    //   listener: (context, state) {},
+    //   builder: (context, state) {
+    //     if (state is PartDataLoading) {
+    //       return const AddPartLoadingView();
+    //     }
+
+    //     if (state is PartDataError) {
+    //       return ErrorView(message: state.message);
+    //     }
+
+    //     if (state is PartDataLoaded) {
+    //       return _addPartForm();
+    //     }
+
+    //     return const SizedBox.shrink();
+    //   },
+    // );
     return _addPartForm();
   }
 
@@ -95,6 +139,31 @@ class _AddPartPageState extends State<AddPartPage> {
       decoration: cardDecoration(),
       child: Form(
         key: _formKey,
+        // child: BlocConsumer<AddPartBloc, AddPartState>(
+        //   listener: (context, state) {},
+        //   builder: (context, state) {
+        //     if (state is PartDataLoading) {
+        //       return const AddPartLoadingView();
+        //     }
+
+        //     if (state is PartDataError) {
+        //       return ErrorView(message: state.message);
+        //     }
+
+        //     if (state is PartDataLoaded) {
+        //       return Column(
+        //         crossAxisAlignment: CrossAxisAlignment.start,
+        //         children: [
+        //           _buildFormHeader(),
+        //           _buildBasicInfoSection(),
+        //           _buildLocationSection(),
+        //           const SizedBox(height: 32),
+        //         ],
+        //       );
+        //     }
+        //     return const SizedBox.shrink();
+        //   },
+        // ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -129,11 +198,15 @@ class _AddPartPageState extends State<AddPartPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildInternalPartNumberField(),
+        const SizedBox(height: 20),
         _buildManufacturerDropdown(),
+        const SizedBox(height: 20),
+        _buildManufacturerPartNumberField(),
         const SizedBox(height: 20),
         _buildPartTypeDropdown(),
         const SizedBox(height: 20),
-        _buildManufacturerPartNumberField(),
+        _buildCostField(),
         const SizedBox(height: 20),
         _buildCurrentStockField(),
         const SizedBox(height: 20),
@@ -150,112 +223,96 @@ class _AddPartPageState extends State<AddPartPage> {
         _buildWarehouseDropdown(),
         const SizedBox(height: 20),
         _buildLocationDropdown(),
+        // const SizedBox(height: 20),
+        // _buildRackDropdown(),
         const SizedBox(height: 20),
-        _buildRackDropdown(),
-        const SizedBox(height: 20),
-        _buildAlternatePartNumberDropdown(),
       ],
     );
   }
 
   Widget _buildManufacturerDropdown() {
-    // return EnhancedCustomDropdown<String>(
-    //   label: 'Manufacturer Name',
-    //   hint: 'Select manufacturer',
-    //   icon: Icons.business,
-    //   value: _selectedManufacturer,
-    //   items: DropdownData.getManufacturers(),
-    //   onChanged: (value) {
-    //     setState(() {
-    //       _selectedManufacturer = value;
-    //     });
-    //   },
-    //   onAddNew: (newManufacturer) {
-    //     // Add new manufacturer to the list
-    //     setState(() {
-    //       _selectedManufacturer = newManufacturer;
-    //     });
-    //     // In a real app, you would save this to your data source
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       SnackBar(
-    //         content: Text('Added new manufacturer: $newManufacturer'),
-    //         backgroundColor: Colors.green,
-    //         behavior: SnackBarBehavior.floating,
-    //       ),
-    //     );
-    //   },
-    //   validator: (value) {
-    //     if (value == null || value.isEmpty) {
-    //       return 'Please select manufacturer';
-    //     }
-    //     return null;
-    //   },
-    // );
-    return CustomDropdownMenu<String>(
-      width: MediaQuery.of(context).size.width - 32,
-      menuHeight: 200,
-      hintText: 'Search and select part type...',
-      leadingIcon: const Icon(Icons.category),
-      enableSearch: true,
-      enableFilter: true,
-      requestFocusOnTap: true,
-      inputDecorationTheme: const InputDecorationTheme(
-        border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-      ),
-      onSelected: (String? value) {
-        setState(() {
-          _selectedManufacturer = value;
-        });
+    return BlocBuilder<AddPartBloc, AddPartState>(
+      bloc: _addPartBloc,
+      builder: (context, state) {
+        if (state is PartDataLoaded) {
+          debugPrint('state.manufacturerList ${state.manufacturerList}');
+          return CustomDropdown<String>(
+            label: 'Manufacturer Name',
+            hint: 'Search and select Manufacturer name...',
+            icon: Icons.business,
+            value: _selectedManufacturer,
+            items: state.manufacturerList.map<CustomDropdownMenuEntry<String>>(
+                (Manufacturer manufacturer) {
+              return CustomDropdownMenuEntry<String>(
+                value: manufacturer.manufacturerId.toString(),
+                label: manufacturer.name,
+                leadingIcon: const Icon(Icons.business, size: 18),
+              );
+            }).toList(),
+            onSelected: (String? value) {
+              setState(() {
+                _selectedManufacturer = value;
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select Manufacturer name';
+              }
+              return null;
+            },
+            addItemBtnTitle: 'New Manufacturer',
+            onItemBtnClicked: () {
+              debugPrint('add item button clicked');
+              _showAddNewDialog(context);
+            },
+          );
+        }
+        return const SizedBox.shrink();
       },
-      addItemBtnTitle: 'New Manufacturer',
-      onItemBtnClicked: () {
-        debugPrint('add item button clicked');
-        _showAddNewDialog(context);
-      },
-      dropdownMenuEntries: DropdownData.getPartTypes()
-          .map<CustomDropdownMenuEntry<String>>((String partType) {
-        return CustomDropdownMenuEntry<String>(
-          value: partType,
-          label: partType,
-          leadingIcon: const Icon(Icons.widgets, size: 18),
-        );
-      }).toList(),
     );
   }
 
   Widget _buildPartTypeDropdown() {
-    return EnhancedCustomDropdown<String>(
+    // return CustomDropdown<String>(
+    //   label: 'Part Type',
+    //   hint: 'Select part type',
+    //   icon: Icons.category,
+    //   value: _selectedPartType,
+    //   items: DropdownData.getPartTypes()
+    //       .map<CustomDropdownMenuEntry<String>>((partType) {
+    //     return CustomDropdownMenuEntry<String>(
+    //       // value: partType,
+    //       // child: Text(partType),
+    //       value: partType,
+    //       label: partType,
+    //       leadingIcon: const Icon(Icons.category, size: 18),
+    //     );
+    //   }).toList(),
+    //   onSelected: (value) {
+    //     setState(() {
+    //       _selectedPartType = value;
+    //     });
+    //   },
+    //   validator: (value) {
+    //     if (value == null || value.isEmpty) {
+    //       return 'Please select part type';
+    //     }
+    //     return null;
+    //   },
+    //   addItemBtnTitle: 'Add Part Type',
+    //   onItemBtnClicked: () {
+    //     debugPrint('add item button clicked');
+    //     _showAddNewDialog(context);
+    //   },
+    // );
+    return CustomTextField(
+      controller: _manufacturerPartNumberController,
       label: 'Part Type',
-      hint: 'Select part type',
+      hint: 'Enter part type',
       icon: Icons.category,
-      value: _selectedPartType,
-      items: DropdownData.getPartTypes(),
-      onChanged: (value) {
-        setState(() {
-          _selectedPartType = value;
-        });
-      },
-      onAddNew: (newPartType) {
-        // Add new part type to the list
-        setState(() {
-          _selectedPartType = newPartType;
-        });
-        // In a real app, you would save this to your data source
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Added new part type: $newPartType'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Please select part type';
+          return 'Please enter part type';
         }
         return null;
       },
@@ -271,6 +328,21 @@ class _AddPartPageState extends State<AddPartPage> {
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please enter manufacturer part number';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildCostField() {
+    return CustomTextField(
+      controller: _partCostController,
+      label: 'Cost',
+      hint: 'Enter cost of the part',
+      icon: Icons.attach_money,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please cost of the part';
         }
         return null;
       },
@@ -313,96 +385,101 @@ class _AddPartPageState extends State<AddPartPage> {
   }
 
   Widget _buildWarehouseDropdown() {
-    return CustomDropdown<String>(
-      label: 'Warehouse',
-      hint: 'Select warehouse',
-      icon: Icons.warehouse,
-      value: _selectedWarehouse,
-      items: DropdownData.getWarehouses().map((warehouse) {
-        return DropdownMenuItem<String>(
-          value: warehouse,
-          child: Text(warehouse),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          _selectedWarehouse = value;
-        });
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select warehouse';
+    return BlocBuilder<AddPartBloc, AddPartState>(
+      bloc: _addPartBloc,
+      builder: (context, state) {
+        if (state is PartDataLoaded) {
+          return CustomDropdown<String>(
+            label: 'Warehouse',
+            hint: 'Select warehouse',
+            icon: Icons.warehouse,
+            value: _selectedWarehouse,
+            items: state.warehouseList.map((warehouse) {
+              return CustomDropdownMenuEntry<String>(
+                value: warehouse.warehouseId.toString(),
+                label: warehouse.warehouseName,
+                leadingIcon: const Icon(Icons.warehouse, size: 18),
+              );
+            }).toList(),
+            onSelected: (value) {
+              setState(() {
+                _selectedWarehouse = value;
+              });
+              _addPartBloc
+                  .add(GetLocationList(warehouseId: _selectedWarehouse ?? ''));
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select warehouse';
+              }
+              return null;
+            },
+            addItemBtnTitle: 'Add warehouse',
+            onItemBtnClicked: () {
+              debugPrint('add item button clicked');
+              _showAddNewDialog(context);
+            },
+          );
         }
-        return null;
+        return const SizedBox.shrink();
       },
     );
   }
 
   Widget _buildLocationDropdown() {
-    return CustomDropdown<String>(
-      label: 'Location',
-      hint: 'Select location',
-      icon: Icons.location_on,
-      value: _selectedLocation,
-      items: DropdownData.getLocations().map((location) {
-        return DropdownMenuItem<String>(
-          value: location,
-          child: Text(location),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          _selectedLocation = value;
-        });
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select location';
+    return BlocBuilder<AddPartBloc, AddPartState>(
+      bloc: _addPartBloc,
+      builder: (context, state) {
+        if (state is PartDataLoaded) {
+          return CustomDropdown<String>(
+            label: 'Location',
+            hint: 'Select location',
+            icon: Icons.location_on,
+            value: _selectedLocation,
+            items: state.locationList.map((location) {
+              return CustomDropdownMenuEntry<String>(
+                value: location.locationId.toString(),
+                label: location.locationName,
+                leadingIcon: const Icon(Icons.location_on, size: 18),
+              );
+            }).toList(),
+            onSelected: (value) {
+              setState(() {
+                _selectedLocation = value;
+              });
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select location';
+              }
+              return null;
+            },
+            addItemBtnTitle: 'Add Location',
+            onItemBtnClicked: () {
+              debugPrint('add item button clicked');
+              _showAddNewDialog(context);
+            },
+          );
         }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildRackDropdown() {
-    return CustomDropdown<String>(
-      label: 'Rack',
-      hint: 'Select rack',
-      icon: Icons.view_module,
-      value: _selectedRack,
-      items: DropdownData.getRacks().map((rack) {
-        return DropdownMenuItem<String>(
-          value: rack,
-          child: Text(rack),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          _selectedRack = value;
-        });
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select rack';
-        }
-        return null;
+        return const SizedBox.shrink();
       },
     );
   }
 
   Widget _buildAlternatePartNumberDropdown() {
     return CustomDropdown<String>(
-      label: 'Alternate Part Number',
-      hint: 'Select alternate part number',
+      label: 'Internal Part Number',
+      hint: 'Select internal part number',
       icon: Icons.swap_horiz,
       value: _selectedAlternatePartNumber,
       items: DropdownData.getAlternatePartNumbers().map((altPartNumber) {
-        return DropdownMenuItem<String>(
+        return CustomDropdownMenuEntry<String>(
           value: altPartNumber,
-          child: Text(altPartNumber),
+          label: altPartNumber,
+          leadingIcon: const Icon(Icons.swap_horiz, size: 18),
         );
       }).toList(),
-      onChanged: (value) {
+      onSelected: (value) {
         setState(() {
           _selectedAlternatePartNumber = value;
         });
@@ -413,6 +490,43 @@ class _AddPartPageState extends State<AddPartPage> {
         }
         return null;
       },
+      addItemBtnTitle: 'Add Part Number',
+      onItemBtnClicked: () {
+        debugPrint('add item button clicked');
+        _showAddNewDialog(context);
+      },
+    );
+  }
+
+  Widget _buildInternalPartNumberField() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: CustomTextField(
+            controller: _internalPartNumberController,
+            label: 'Internal Part Number',
+            hint: 'Enter internal part number',
+            icon: Icons.tag,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter internal part number';
+              }
+              return null;
+            },
+          ),
+        ),
+        Center(
+          child: ElevatedButton(
+            onPressed: () {
+              _addPartBloc.add(
+                  GetPartData(partNumber: _internalPartNumberController.text));
+            },
+            child: const Text('Submit'),
+          ),
+        ),
+      ],
     );
   }
 
@@ -534,6 +648,36 @@ class _AddPartPageState extends State<AddPartPage> {
           ],
         );
       },
+    );
+  }
+}
+
+class AddPartLoadingView extends StatelessWidget {
+  const AddPartLoadingView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 400,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(
+              color: Color(0xFF1565C0),
+              strokeWidth: 2,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Loading parts...',
+              style: GoogleFonts.inter(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
