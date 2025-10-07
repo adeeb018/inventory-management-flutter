@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:inventory_management/features/add_parts/data/repositories/add_part_repository_impl.dart';
+import 'package:inventory_management/features/add_parts/domain/models/add_part_request.dart';
 import 'package:inventory_management/features/add_parts/domain/usecases/add_parts_usecase.dart';
 import 'package:inventory_management/features/add_parts/presentation/bloc/add_part_bloc.dart';
 import '../../../../core/network/api_client.dart';
@@ -24,6 +25,7 @@ class _AddPartPageState extends State<AddPartPage> {
   final _formKey = GlobalKey<FormState>();
   final _internalPartNumberController = TextEditingController();
   final _manufacturerPartNumberController = TextEditingController();
+  final _partTypeController = TextEditingController();
   final _partCostController = TextEditingController();
   final _currentStockController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -306,7 +308,7 @@ class _AddPartPageState extends State<AddPartPage> {
     //   },
     // );
     return CustomTextField(
-      controller: _manufacturerPartNumberController,
+      controller: _partTypeController,
       label: 'Part Type',
       hint: 'Enter part type',
       icon: Icons.category,
@@ -600,13 +602,33 @@ class _AddPartPageState extends State<AddPartPage> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Part added successfully!'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
+      _addPartBloc.add(
+        AddPart(
+          addPartRequest: AddPartRequest(
+            partNumber: partNumber,
+            description: _descriptionController.text.trim(),
+            partType: _partTypeController.text.trim(),
+            manufacturerId: int.tryParse(_selectedManufacturer ?? "0") ?? 0,
+            manufacturerPartNumber:
+                _manufacturerPartNumberController.text.trim(),
+            unitCost: double.tryParse(_partCostController.text.trim()) ?? 0,
+            currency: "INR",
+            initialStock:
+                int.tryParse(_currentStockController.text.trim()) ?? 0,
+            locationId: int.tryParse(_selectedLocation ?? "0") ?? 0,
+            warehouseId: int.tryParse(_selectedWarehouse ?? "0") ?? 0,
+            createdBy: 0,
+          ),
         ),
       );
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Part added successfully!'),
+      //     backgroundColor: Colors.green,
+      //     behavior: SnackBarBehavior.floating,
+      //   ),
+      // );
       context.go('/parts');
     }
   }

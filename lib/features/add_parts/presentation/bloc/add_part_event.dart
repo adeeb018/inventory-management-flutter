@@ -13,7 +13,7 @@ class GetLocationList extends AddPartEvent {
   GetLocationList({required this.warehouseId});
 }
 
-class AddPartData extends AddPartEvent {
+class AddPart extends AddPartEvent {
   final AddPartRequest addPartRequest;
-  AddPartData({required this.addPartRequest});
+  AddPart({required this.addPartRequest});
 }

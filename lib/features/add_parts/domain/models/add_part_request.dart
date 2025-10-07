@@ -1,9 +1,10 @@
 import 'dart:convert';
 
-AddPartRequest partDataModelFromJson(String str) =>
+AddPartRequest addPartRequestModelFromJson(String str) =>
     AddPartRequest.fromJson(json.decode(str));
 
-String partDataModelToJson(AddPartRequest data) => json.encode(data.toJson());
+String addPartRequestModelToJson(AddPartRequest data) =>
+    json.encode(data.toJson());
 
 class AddPartRequest {
   final String partNumber;

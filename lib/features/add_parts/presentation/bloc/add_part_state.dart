@@ -66,3 +66,14 @@ final class PartDataError extends AddPartState {
 
   PartDataError(this.message);
 }
+
+final class PartDataAdded extends AddPartState {
+  final String message;
+
+  PartDataAdded(this.message);
+}
+
+final class PartDataAddError extends AddPartState {
+  final String message;
+  PartDataAddError(this.message);
+}

@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
+import '../../domain/models/add_part_request.dart';
 import '../../domain/models/part_data/part_data.dart';
 import '../../domain/usecases/add_parts_usecase.dart';
 

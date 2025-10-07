@@ -3,6 +3,7 @@ import 'package:inventory_management/features/add_parts/domain/repositories/add_
 
 import '../../../../core/constants.dart';
 import '../../../../core/network/api_client.dart';
+import '../../domain/models/add_part_request.dart';
 
 class AddPartRepositoryImpl implements AddPartRepository {
   final ApiClient apiClient;
@@ -25,6 +26,17 @@ class AddPartRepositoryImpl implements AddPartRepository {
       }
     } catch (e) {
       throw Exception('Part details fetch failed: $e');
+    }
+  }
+
+  @override
+  Future<void> addPartData(AddPartRequest addPartRequest) async {
+    try {
+      final res = await apiClient.dio
+          .post(AppConstants.addParts, data: addPartRequest.toJson());
+      print("addPartData: $res");
+    } catch (e) {
+      throw Exception('Part add failed: $e');
     }
   }
 }
